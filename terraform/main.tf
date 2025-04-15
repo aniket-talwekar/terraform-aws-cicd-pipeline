@@ -1,14 +1,18 @@
 provider "aws" {
-  region = "us-east-1"  # You can change the region
+  region = var.aws_region
 }
 
 resource "aws_instance" "example" {
-  ami           = "ami-0c55b159cbfafe1f0"  # Example AMI, change to your preferred one
-  instance_type = "t2.micro"
+  ami           = "ami-080b1a55a0ad28c02"  # AMI ID for 64-bit (x86)
+  instance_type = var.instance_type
 
   tags = {
-    Name = "MyEC2Instance"
+    Name = "Terraform-EC2-Instance"
   }
+}
+
+output "instance_public_ip" {
+  value = aws_instance.example.public_ip
 }
 
 output "instance_id" {
