@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/YOUR-GITHUB-USERNAME/terraform-aws-cicd-pipeline.git'
+                git 'https://github.com/aniket-talwekar/terraform-aws-cicd-pipeline.git'
             }
         }
 
