@@ -15,7 +15,7 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/yeshwanthlm/Terraform-Jenkins.git"
+                            https://github.com/aniket-talwekar/terraform-aws-cicd-pipeline.git"
                         }
                     }
                 }
