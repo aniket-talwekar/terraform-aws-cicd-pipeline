@@ -1,69 +1,49 @@
 pipeline {
-    agent any  // This means the pipeline will run on any available agent (node)
+    agent any
 
     environment {
-        // Set AWS credentials here. Make sure AWS CLI is configured on the Jenkins agent.
-        AWS_REGION = 'us-east-1' // Define the AWS region for your resources
-        TERRAFORM_VERSION = '1.1.7' // Terraform version (you can specify your own version)
+        AWS_REGION = 'ap-south-1'
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Checkout Code') {
             steps {
-                // Clone the GitHub repository containing your Terraform files
-                git branch: 'main', url: 'https://github.com/your-username/terraform-aws-cicd-pipeline.git'
-            }
-        }
-
-        stage('Install Terraform') {
-            steps {
-                // Install Terraform if it's not already installed on the Jenkins agent
-                sh '''
-                curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-                sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-                sudo apt-get update
-                sudo apt-get install terraform
-                terraform -version
-                '''
+                git 'https://github.com/YOUR-GITHUB-USERNAME/terraform-aws-cicd-pipeline.git'
             }
         }
 
         stage('Terraform Init') {
             steps {
-                // Initialize Terraform and download the necessary provider plugins
-                sh 'terraform init'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-terraform-creds'
+                ]]) {
+                    sh 'terraform -chdir=terraform init'
+                }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                // Run Terraform Plan to see the changes that will be made
-                sh 'terraform plan -out=tfplan'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-terraform-creds'
+                ]]) {
+                    sh 'terraform -chdir=terraform plan'
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                // Apply the changes to AWS infrastructure
-                // Using `-auto-approve` to skip manual approval
-                sh 'terraform apply -auto-approve tfplan'
+                input "Do you want to apply changes?"
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-terraform-creds'
+                ]]) {
+                    sh 'terraform -chdir=terraform apply -auto-approve'
+                }
             }
-        }
-
-        stage('Post-Deployment') {
-            steps {
-                // You can use Terraform output to get the instance ID, IP address, etc., if needed.
-                sh 'terraform output'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment was successful!'
-        }
-        failure {
-            echo 'Deployment failed. Please check the logs.'
         }
     }
 }
