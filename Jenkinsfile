@@ -13,9 +13,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Checkout code from GitHub repository
+                    // Checkout code from GitHub repository with specific branch
                     dir('terraform') {
-                        git 'https://github.com/aniket-talwekar/terraform-aws-cicd-pipeline.git'
+                        git branch: 'main', url: 'https://github.com/aniket-talwekar/terraform-aws-cicd-pipeline.git'
                     }
                 }
             }
